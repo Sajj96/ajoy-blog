@@ -41,11 +41,29 @@ app.use("/posts", postRouter);
 app.use("/auth", authRouter);
 
 app.get("/", (req, res) => {
-  res.render("index", {
-    success: req.flash("success"),
-    error: req.flash("error"),
-    user: req.user
-  });
+  if(req.user) {
+    con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id",(err, posts) => {
+      if (err) throw err;
+  
+      res.render("index", {
+        success: req.flash("success"),
+        error: req.flash("error"),
+        user: req.user,
+        posts
+      });
+    });
+  } else {
+    con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id and p.status = ?",0,(err, posts) => {
+      if (err) throw err;
+  
+      res.render("index", {
+        success: req.flash("success"),
+        error: req.flash("error"),
+        user: req.user,
+        posts
+      });
+    });
+  }
 });
 
 app.get("/about", (req, res) => {
@@ -57,11 +75,29 @@ app.get("/contact", (req, res) => {
 });
 
 app.get("**", (req, res) => {
-  res.render("index", {
-    success: req.flash("success"),
-    error: req.flash("error"),
-    user: req.user
-  });
+  if(req.user) {
+    con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id",(err, posts) => {
+      if (err) throw err;
+  
+      res.render("index", {
+        success: req.flash("success"),
+        error: req.flash("error"),
+        user: req.user,
+        posts
+      });
+    });
+  } else {
+    con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id and p.status = ?",0,(err, posts) => {
+      if (err) throw err;
+  
+      res.render("index", {
+        success: req.flash("success"),
+        error: req.flash("error"),
+        user: req.user,
+        posts
+      });
+    });
+  }
 });
 
 app.listen(port, () => {

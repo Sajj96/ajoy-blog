@@ -24,7 +24,7 @@ function localStrategy() {
                 if (err) throw err;
                 
                 user.forEach(x => {
-                    if(user.length > 1 && bcrypt.compareSync(password, x.password)) {
+                    if(user.length > 0 && bcrypt.compareSync(password, x.password)) {
                         done(null, user);
                     } else {
                         done(null, false);

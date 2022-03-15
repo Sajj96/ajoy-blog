@@ -9,7 +9,7 @@ function routes(con) {
             con.query("select * from posts",(err, posts) => {
                 if (err) throw err;
             
-                res.render('post', {
+                res.render('posts', {
                   title: 'Ajoy Blog',
                   page_title: 'Posts',
                   posts,
@@ -20,7 +20,7 @@ function routes(con) {
             con.query("select * from posts where status = 0",(err, posts) => {
                 if (err) throw err;
             
-                res.render('post', {
+                res.render('posts', {
                   title: 'Ajoy Blog',
                   page_title: 'Posts',
                   posts,
@@ -58,9 +58,10 @@ function routes(con) {
             description: req.body.description,
             content: req.body.content,
             status: req.body.status,
-            posted_by: req.user.id,
+            posted_by: req.user[0]['id'],
             created_at: dateString
         }
+
         con.query('INSERT INTO posts SET ?', post, function (error, results, fields) {
             if (error) {
                 req.flash("error", "Something went wrong while creating a post!");
@@ -83,6 +84,19 @@ function routes(con) {
             });
         });
     });
+
+    postRoutes.route('/:id').get((req, res) => {
+        con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id and p.id = ?",req.params.id, (err, post) => {
+            if (err) throw err;
+        
+            res.render('post', {
+              title: 'Ajoy Blog',
+              page_title: 'Post',
+              post,
+              user: req.user
+            });
+          });
+    })
 
     return postRoutes;
 }

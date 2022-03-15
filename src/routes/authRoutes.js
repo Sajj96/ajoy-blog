@@ -31,43 +31,46 @@ function routes(con) {
             });
         } else {
             con.query("select * from users where username = ? and email = ?",[post.username, post.email], (err, user) => {
-                user.forEach(x => {
-                    if(x.username == post.username) {
-                        req.flash("error", "Username already taken!");
-                              res.render('auth/register', {
-                                page_title: 'Sign up',
-                                success: req.flash("success"),
-                                error: req.flash("error"),
+                if (err) throw err;
+                if(user.length > 0) {
+                        user.forEach(x => {
+                            if(x.username == post.username) {
+                                req.flash("error", "Username already taken!");
+                                    res.render('auth/register', {
+                                        page_title: 'Sign up',
+                                        success: req.flash("success"),
+                                        error: req.flash("error"),
+                                        user: req.user
+                                    });
+                            } else if(x.email == post.email) {
+                                req.flash("error", "Email already taken!");
+                                    res.render('auth/register', {
+                                        page_title: 'Sign up',
+                                        success: req.flash("success"),
+                                        error: req.flash("error"),
+                                        user: req.user
+                                    });
+                            } 
+                        })
+                } else {
+                    con.query('INSERT INTO users SET ?', post, function (error, results, fields) {
+                        if (error) {
+                        req.flash("error", "Something went wrong while saving user!");
+                        res.render('auth/register', {
+                            page_title: 'Sign up',
+                            success: req.flash("success"),
+                            error: req.flash("error"),
+                            user: req.user
+                        });
+                        }
+            
+                        req.login(req.body, () => {
+                            res.render('index', {
                                 user: req.user
-                              });
-                    } else if(x.email == post.email) {
-                        req.flash("error", "Email already taken!");
-                              res.render('auth/register', {
-                                page_title: 'Sign up',
-                                success: req.flash("success"),
-                                error: req.flash("error"),
-                                user: req.user
-                              });
-                    } else {
-                        con.query('INSERT INTO users SET ?', post, function (error, results, fields) {
-                            if (error) {
-                              req.flash("error", "Something went wrong while saving user!");
-                              res.render('auth/register', {
-                                page_title: 'Sign up',
-                                success: req.flash("success"),
-                                error: req.flash("error"),
-                                user: req.user
-                              });
-                            }
-                
-                            req.login(req.body, () => {
-                                res.render('index', {
-                                    user: req.user
-                                });
                             });
                         });
-                    }
-                })
+                    });
+                }
             })
         }
     });
