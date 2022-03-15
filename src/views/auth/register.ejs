@@ -40,8 +40,12 @@
         <div class="card">
           <div class="card-body register-card-body">
             <p class="login-box-msg">Register a new membership</p>
-
-            <form action="../../index.html" method="post">
+            <% if(typeof success != 'undefined' && success) { %>
+              <div class="alert alert-success"><%= success %></div>
+            <% } else if(typeof error != 'undefined' && error) { %>
+              <div class="alert alert-danger"><%= error %></div>
+            <% } %>
+            <form action="/auth/signup" method="post">
               <div class="input-group mb-3">
                 <input
                   type="text"
@@ -81,7 +85,7 @@
                   type="password"
                   class="form-control"
                   placeholder="Retype password"
-                  name="confrim_password"
+                  name="confirm_password"
                 />
                 <div class="input-group-append">
                   <div class="input-group-text">
@@ -100,8 +104,8 @@
               </div>
             </form>
 
-            <a href="auth/signin" class="text-center"
-              >I already have a membership</a
+            Already have an account? <a href="/auth/signin" class="text-center"
+              >Sign in</a
             >
           </div>
           <!-- /.form-box -->

@@ -1,6 +1,7 @@
 const passport = require('passport');
 const { Strategy } = require('passport-local');
 const mysql = require("mysql");
+const bcrypt = require('bcrypt');
 
 const con = mysql.createConnection({
     host: "localhost",
@@ -19,14 +20,16 @@ function localStrategy() {
         passwordField: 'password'
     }, (username, password, done) => {
         try {
-            con.query("select * from users where username = ? and password = ? ",[username, password],(err, user) => {
+            con.query("select * from users where username = ?",[username],(err, user) => {
                 if (err) throw err;
-    
-                if(user.length < 1) {
-                    done(null, false);
-                } else {
-                    done(null, user);
-                }
+                
+                user.forEach(x => {
+                    if(user.length > 1 && bcrypt.compareSync(password, x.password)) {
+                        done(null, user);
+                    } else {
+                        done(null, false);
+                    }
+                })
             });
         } catch (error) {
             done(error, false);

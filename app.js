@@ -41,7 +41,11 @@ app.use("/posts", postRouter);
 app.use("/auth", authRouter);
 
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", {
+    success: req.flash("success"),
+    error: req.flash("error"),
+    user: req.user
+  });
 });
 
 app.get("/about", (req, res) => {
@@ -56,6 +60,7 @@ app.get("**", (req, res) => {
   res.render("index", {
     success: req.flash("success"),
     error: req.flash("error"),
+    user: req.user
   });
 });
 

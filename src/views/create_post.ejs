@@ -16,6 +16,11 @@
 <div class="container">
   <div class="row">
     <div class="col-md-8 offset-md-2">
+      <% if(typeof success != 'undefined' && success) { %>
+        <div class="alert alert-success"><%= success %></div>
+      <% } else if(typeof error != 'undefined' && error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
       <form action="/posts/create" method="POST">
         <div class="control-group">
           <div class="form-group floating-label-form-group controls">
