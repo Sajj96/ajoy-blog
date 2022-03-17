@@ -1,9 +1,9 @@
 const express = require('express');
 
-const postRoutes = express.Router();
+const postRouter = express.Router();
 
 function routes(con) {
-    postRoutes.route('/')
+    postRouter.route('/')
     .get((req, res) => {
         if(req.user) {
             con.query("select * from posts",(err, posts) => {
@@ -30,21 +30,24 @@ function routes(con) {
         }
     });
 
-    postRoutes.route('/create')
+    //Post middleware
+    postRouter.use((req, res, next) => {
+        if(req.user) {
+        next();
+        } else {
+            res.render("auth/login", {
+                user: req.user
+            });
+        }
+    });
+
+    postRouter.route('/create')
     .get((req, res) => {
-       if(req.user) {
         res.render('create_post', {
             title: 'Ajoy Blog',
             page_title: 'Create Post',
             user: req.user
         });
-       } else {
-        res.render('auth/login', {
-            title: 'Ajoy Blog',
-            page_title: 'Login',
-            user: req.user
-        });
-       }
     })
     .post((req, res) => {
         const date  = new Date();
@@ -85,7 +88,7 @@ function routes(con) {
         });
     });
 
-    postRoutes.route('/:id').get((req, res) => {
+    postRouter.route('/:id').get((req, res) => {
         con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id and p.id = ?",req.params.id, (err, post) => {
             if (err) throw err;
         
@@ -98,7 +101,7 @@ function routes(con) {
           });
     })
 
-    return postRoutes;
+    return postRouter;
 }
 
 module.exports = routes;

@@ -2,10 +2,10 @@ const express = require("express");
 const passport = require("passport");
 const bcrypt = require('bcrypt');
 
-const authRoutes = express.Router();
+const authRouter = express.Router();
 
 function routes(con) {
-    authRoutes.route('/signup')
+    authRouter.route('/signup')
     .get((req, res) => {
         res.render('auth/register', {
             page_title: 'Sign up',
@@ -65,9 +65,29 @@ function routes(con) {
                         }
             
                         req.login(req.body, () => {
-                            res.render('index', {
-                                user: req.user
-                            });
+                            if(req.user) {
+                                con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id",(err, posts) => {
+                                  if (err) throw err;
+                              
+                                  res.render("index", {
+                                    success: req.flash("success"),
+                                    error: req.flash("error"),
+                                    user: req.user,
+                                    posts
+                                  });
+                                });
+                              } else {
+                                con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id and p.status = ?",0,(err, posts) => {
+                                  if (err) throw err;
+                              
+                                  res.render("index", {
+                                    success: req.flash("success"),
+                                    error: req.flash("error"),
+                                    user: req.user,
+                                    posts
+                                  });
+                                });
+                              }
                         });
                     });
                 }
@@ -75,7 +95,7 @@ function routes(con) {
         }
     });
 
-    authRoutes.route('/signin')
+    authRouter.route('/signin')
     .get((req, res) => {
         res.render('auth/login', {
             success: req.flash("success"),
@@ -98,21 +118,35 @@ function routes(con) {
     
             req.login(user, function(err) {
               if (err) { return next(err); }
-              return res.render('index', {
-                user: req.user
-              });
+                con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id and p.status = ?",0,(err, posts) => {
+                  if (err) throw err;
+              
+                  return res.render("index", {
+                    success: req.flash("success"),
+                    error: req.flash("error"),
+                    user: req.user,
+                    posts
+                  });
+                });
             });
         })(req, res, next);
     });
 
-    authRoutes.route('/logout').get((req, res) => {
+    authRouter.route('/logout').get((req, res) => {
         req.logout();
-        res.render('index',{
-            user: req.user
+        con.query("select p.*, u.username from posts p, users u where p.posted_by=u.id",(err, posts) => {
+            if (err) throw err;
+        
+            res.render("index", {
+            success: req.flash("success"),
+            error: req.flash("error"),
+            user: req.user,
+            posts
+            });
         });
     });
 
-    return authRoutes;
+    return authRouter;
 }
 
 module.exports = routes;

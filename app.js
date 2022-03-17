@@ -67,11 +67,15 @@ app.get("/", (req, res) => {
 });
 
 app.get("/about", (req, res) => {
-  res.render("about");
+  res.render("about", {
+    user: req.user,
+  });
 });
 
 app.get("/contact", (req, res) => {
-  res.render("contact");
+  res.render("contact", {
+    user: req.user,
+  });
 });
 
 app.get("**", (req, res) => {
